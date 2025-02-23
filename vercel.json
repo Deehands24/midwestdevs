@@ -1,6 +1,6 @@
 {
-  "buildCommand": "remix vite:build",
-  "devCommand": "remix vite:dev",
+  "buildCommand": "npx remix vite:build",
+  "devCommand": "npx remix vite:dev",
   "framework": "vite",
   "installCommand": "npm install",
   "outputDirectory": "build"
