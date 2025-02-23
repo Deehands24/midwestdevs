@@ -1,53 +1,181 @@
-import type { MetaFunction } from "@remix-run/node";
+import type { MetaFunction, ActionFunction } from "@remix-run/node";
+import { json } from "@remix-run/node";
+import { useState } from "react";
+import { Modal } from "~/components/Modal";
+import { submitContactForm } from "~/services/supabase.server";
+import type { ContactSubmission } from "~/types";
+import { useActionData } from "@remix-run/react";
+import { AuthModal } from "~/components/AuthModals";
+import { signIn, signUp } from "~/services/auth.server";
+
+export const action: ActionFunction = async ({ request }) => {
+  const formData = await request.formData();
+  const submission = Object.fromEntries(formData);
+
+  try {
+    await submitContactForm(submission as Omit<ContactSubmission, 'id' | 'created_at'>);
+    return json({ success: true });
+  } catch (error) {
+    console.error('Error submitting form:', error);
+    return json({ success: false, error: 'Failed to submit form' }, { status: 400 });
+  }
+};
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix!" },
+    { title: "Mid-West Developments" },
+    { name: "description", content: "Mid-West Developments" },
   ];
 };
 
+const serviceDetails = {
+  brandDevelopment: {
+    title: "Brand Development Services",
+    content: (
+      <div className="space-y-4">
+        <p>At Mid-West Developments, we craft compelling brand identities that resonate with your audience and stand the test of time. Our comprehensive brand development services include:</p>
+        <ul className="list-disc pl-5 space-y-2">
+          <li><strong>Logo Design:</strong> Creative, memorable logos that capture your brand's essence</li>
+          <li><strong>Brand Strategy:</strong> Detailed market analysis and positioning strategy</li>
+          <li><strong>Visual Identity:</strong> Cohesive color schemes, typography, and design elements</li>
+          <li><strong>Brand Guidelines:</strong> Comprehensive documentation for consistent brand application</li>
+          <li><strong>Social Media Presence:</strong> Strategic planning for social media platforms</li>
+          <li><strong>Marketing Collateral:</strong> Business cards, letterheads, and promotional materials</li>
+        </ul>
+        <p>We work closely with you to understand your vision and create a brand that truly represents your business values and appeals to your target market.</p>
+      </div>
+    )
+  },
+  webDevelopment: {
+    title: "Web Development Solutions",
+    content: (
+      <div className="space-y-4">
+        <p>Our web development team creates powerful, scalable, and user-friendly digital solutions tailored to your needs:</p>
+        <ul className="list-disc pl-5 space-y-2">
+          <li><strong>Custom Websites:</strong> Unique, responsive designs that work across all devices</li>
+          <li><strong>E-commerce Solutions:</strong> Secure, efficient online stores with payment integration</li>
+          <li><strong>Web Applications:</strong> Custom tools and platforms for your business needs</li>
+          <li><strong>Content Management Systems:</strong> Easy-to-use interfaces for content updates</li>
+          <li><strong>Performance Optimization:</strong> Fast-loading, SEO-friendly websites</li>
+          <li><strong>Maintenance & Support:</strong> Ongoing technical support and updates</li>
+        </ul>
+        <p>We use the latest technologies and best practices to ensure your web presence is modern, secure, and effective.</p>
+      </div>
+    )
+  },
+  digitalMarketing: {
+    title: "Digital Marketing Expertise",
+    content: (
+      <div className="space-y-4">
+        <p>Drive growth and reach your target audience with our comprehensive digital marketing services:</p>
+        <ul className="list-disc pl-5 space-y-2">
+          <li><strong>SEO Optimization:</strong> Improve your search engine rankings and visibility</li>
+          <li><strong>Content Strategy:</strong> Engaging, relevant content that converts</li>
+          <li><strong>Social Media Management:</strong> Active presence across all platforms</li>
+          <li><strong>Email Marketing:</strong> Targeted campaigns that drive engagement</li>
+          <li><strong>PPC Advertising:</strong> Optimized ad campaigns for maximum ROI</li>
+          <li><strong>Analytics & Reporting:</strong> Detailed insights and performance tracking</li>
+        </ul>
+        <p>Our data-driven approach ensures your marketing efforts deliver measurable results and sustainable growth.</p>
+      </div>
+    )
+  },
+  consultation: {
+    title: "Strategic Consultation Services",
+    content: (
+      <div className="space-y-4">
+        <p>Benefit from our extensive experience with our strategic consultation services:</p>
+        <ul className="list-disc pl-5 space-y-2">
+          <li><strong>Business Strategy:</strong> Comprehensive planning and growth strategies</li>
+          <li><strong>Market Analysis:</strong> In-depth research and competitive analysis</li>
+          <li><strong>Growth Planning:</strong> Scalable solutions for sustainable expansion</li>
+          <li><strong>Technology Assessment:</strong> Evaluation of technical needs and solutions</li>
+          <li><strong>Process Optimization:</strong> Streamline operations and improve efficiency</li>
+          <li><strong>Risk Management:</strong> Identify and mitigate potential challenges</li>
+        </ul>
+        <p>We partner with you to develop actionable strategies that drive success and achieve your business objectives.</p>
+      </div>
+    )
+  }
+};
+
 export default function Index() {
+  const [activeModal, setActiveModal] = useState<keyof typeof serviceDetails | null>(null);
+  const actionData = useActionData<typeof action>();
+
+  const handleSubmit = async (data: Omit<ContactSubmission, 'id' | 'created_at'>) => {
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+
+    const response = await fetch('', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to submit form');
+    }
+
+    setActiveModal(null);
+  };
+
   return (
-    <div className="flex h-screen items-center justify-center">
-      <div className="flex flex-col items-center gap-16">
-        <header className="flex flex-col items-center gap-9">
-          <h1 className="leading text-2xl font-bold text-gray-800 dark:text-gray-100">
-            Welcome to <span className="sr-only">Remix</span>
-          </h1>
-          <div className="h-[144px] w-[434px]">
-            <img
-              src="/logo-light.png"
-              alt="Remix"
-              className="block w-full dark:hidden"
-            />
-            <img
-              src="/logo-dark.png"
-              alt="Remix"
-              className="hidden w-full dark:block"
-            />
+    <div className="flex min-h-screen">
+      <div className="flex flex-col items-center gap-16 w-full pt-32">
+        <header className="flex flex-col items-center gap-9 w-full relative">
+          <div className="w-[800px] mx-auto">
+            <div className="flex justify-center items-center mb-4">
+              <img
+                src="/midwest-logo.png"
+                alt="Mid-West Developments"
+                className="w-full max-w-[600px]"
+              />
+            </div>
+            <div className="relative right-8 mt-8">
+              <img
+                src="/dev-logo.png"
+                alt="Development Design"
+                className="w-full"
+              />
+            </div>
           </div>
         </header>
-        <nav className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-gray-200 p-6 dark:border-gray-700">
-          <p className="leading-6 text-gray-700 dark:text-gray-200">
-            What&apos;s next?
-          </p>
+        <nav className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-red-200 p-6 dark:border-red-700 bg-gray-800/75">
+          <h1 className="text-2xl font-bold leading-6 text-white">
+            We have the time and the expertise to put you on the map!
+          </h1>
           <ul>
-            {resources.map(({ href, text, icon }) => (
-              <li key={href}>
-                <a
-                  className="group flex items-center gap-3 self-stretch p-3 leading-normal text-blue-700 hover:underline dark:text-blue-500"
-                  href={href}
-                  target="_blank"
-                  rel="noreferrer"
+            {resources.map(({ id, text, subtext, icon }) => (
+              <li key={id}>
+                <button
+                  onClick={() => setActiveModal(id as keyof typeof serviceDetails)}
+                  className="group flex flex-col gap-2 self-stretch p-3 leading-normal text-white hover:underline w-full text-left"
                 >
-                  {icon}
-                  {text}
-                </a>
+                  <div className="flex items-center gap-3">
+                    {icon}
+                    <div className="text-white text-xl" dangerouslySetInnerHTML={{ __html: text }} />
+                  </div>
+                  <p className="text-lg text-white">{subtext}</p>
+                </button>
               </li>
             ))}
           </ul>
         </nav>
+
+        {/* Service Modals */}
+        {activeModal && (
+          <Modal
+            isOpen={true}
+            onClose={() => setActiveModal(null)}
+            title={serviceDetails[activeModal].title}
+            serviceType={activeModal}
+            onSubmit={handleSubmit}
+          >
+            {serviceDetails[activeModal].content}
+          </Modal>
+        )}
       </div>
     </div>
   );
@@ -55,8 +183,9 @@ export default function Index() {
 
 const resources = [
   {
-    href: "https://remix.run/start/quickstart",
-    text: "Quick Start (5 min)",
+    id: "brandDevelopment",
+    text: "<h3>Brand Development</h3>",
+    subtext: "Logo design, marketing strategy, company identity, social media presence, and more.",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -76,8 +205,9 @@ const resources = [
     ),
   },
   {
-    href: "https://remix.run/start/tutorial",
-    text: "Tutorial (30 min)",
+    id: "webDevelopment",
+    text: "<h3>Web Development</h3>",
+    subtext: "Custom websites, e-commerce solutions, web applications, and responsive design.",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -97,8 +227,9 @@ const resources = [
     ),
   },
   {
-    href: "https://remix.run/docs",
-    text: "Remix Docs",
+    id: "digitalMarketing",
+    text: "<h3>Digital Marketing</h3>",
+    subtext: "SEO optimization, social media management, content creation, and online advertising.",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -117,19 +248,20 @@ const resources = [
     ),
   },
   {
-    href: "https://rmx.as/discord",
-    text: "Join Discord",
+    id: "consultation",
+    text: "<h3>Consultation Services</h3>",
+    subtext: "Business strategy, market analysis, competitive research, and growth planning.",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
         height="20"
-        viewBox="0 0 24 20"
+        viewBox="0 0 20 20"
         fill="none"
         className="stroke-gray-600 group-hover:stroke-current dark:stroke-gray-300"
       >
         <path
-          d="M15.0686 1.25995L14.5477 1.17423L14.2913 1.63578C14.1754 1.84439 14.0545 2.08275 13.9422 2.31963C12.6461 2.16488 11.3406 2.16505 10.0445 2.32014C9.92822 2.08178 9.80478 1.84975 9.67412 1.62413L9.41449 1.17584L8.90333 1.25995C7.33547 1.51794 5.80717 1.99419 4.37748 2.66939L4.19 2.75793L4.07461 2.93019C1.23864 7.16437 0.46302 11.3053 0.838165 15.3924L0.868838 15.7266L1.13844 15.9264C2.81818 17.1714 4.68053 18.1233 6.68582 18.719L7.18892 18.8684L7.50166 18.4469C7.96179 17.8268 8.36504 17.1824 8.709 16.4944L8.71099 16.4904C10.8645 17.0471 13.128 17.0485 15.2821 16.4947C15.6261 17.1826 16.0293 17.8269 16.4892 18.4469L16.805 18.8725L17.3116 18.717C19.3056 18.105 21.1876 17.1751 22.8559 15.9238L23.1224 15.724L23.1528 15.3923C23.5873 10.6524 22.3579 6.53306 19.8947 2.90714L19.7759 2.73227L19.5833 2.64518C18.1437 1.99439 16.6386 1.51826 15.0686 1.25995ZM16.6074 10.7755L16.6074 10.7756C16.5934 11.6409 16.0212 12.1444 15.4783 12.1444C14.9297 12.1444 14.3493 11.6173 14.3493 10.7877C14.3493 9.94885 14.9378 9.41192 15.4783 9.41192C16.0471 9.41192 16.6209 9.93851 16.6074 10.7755ZM8.49373 12.1444C7.94513 12.1444 7.36471 11.6173 7.36471 10.7877C7.36471 9.94885 7.95323 9.41192 8.49373 9.41192C9.06038 9.41192 9.63892 9.93712 9.6417 10.7815C9.62517 11.6239 9.05462 12.1444 8.49373 12.1444Z"
+          d="M15.0686 1.25995L14.5477 1.17423L14.2913 1.63578C14.1754 1.84439 14.0545 2.08275 13.9422 2.31963C12.6461 2.16488 11.3406 2.16505 10.0445 2.32014C9.92822 2.08178 9.80478 1.84975 9.67412 1.62413L9.41449 1.17584L8.90333 1.25995C7.33547 1.51794 5.80717 1.99419 4.37748 2.66939L4.19 2.75793L4.07461 2.93019C1.23864 7.16437 0.46302 11.3053 0.838165 15.3924L0.868838 15.7266L1.13844 15.9264C2.81818 17.1714 4.68053 18.1233 6.68582 18.719L7.18892 18.8684L7.50166 18.4469C7.96179 17.8268 8.36504 17.1824 8.709 16.4944L8.71099 16.4904C10.8645 17.0471 13.128 17.0485 15.2821 16.4947C15.6261 17.1826 16.0293 17.8269 16.4892 18.4469L16.805 18.8725L17.3116 18.717C19.3056 18.105 21.1876 17.1751 22.8559 15.9238L23.1224 15.724L23.1528 15.3923C23.5873 10.6524 22.3579 6.53306 19.8947 2.90714L19.7759 2.73227L19.5833 2.64518C18.1437 1.99439 16.6386 1.51826 15.0686 1.25995Z"
           strokeWidth="1.5"
         />
       </svg>

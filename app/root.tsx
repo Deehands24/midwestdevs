@@ -4,8 +4,13 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  LiveReload,
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
+import { useState } from "react";
+import { Navbar } from "~/components/Navbar";
+import { AuthModal } from "~/components/AuthModals";
+import { signIn, signUp } from "~/services/auth.server";
 
 import "./tailwind.css";
 
@@ -22,7 +27,23 @@ export const links: LinksFunction = () => [
   },
 ];
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export default function App() {
+  const [authMode, setAuthMode] = useState<'signin' | 'signup' | null>(null);
+
+  const handleAuth = async (data: { email: string; password: string; fullName?: string }) => {
+    try {
+      if (authMode === 'signin') {
+        await signIn(data.email, data.password);
+      } else if (authMode === 'signup' && data.fullName) {
+        await signUp(data.email, data.password, data.fullName);
+      }
+      setAuthMode(null);
+    } catch (error) {
+      console.error('Auth error:', error);
+      throw error;
+    }
+  };
+
   return (
     <html lang="en">
       <head>
@@ -31,15 +52,25 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
-        {children}
+      <body className="min-h-screen">
+        <Navbar 
+          onSignIn={() => setAuthMode('signin')} 
+          onSignUp={() => setAuthMode('signup')} 
+        />
+        <Outlet />
         <ScrollRestoration />
         <Scripts />
+        <LiveReload />
+        
+        {authMode && (
+          <AuthModal
+            isOpen={true}
+            mode={authMode}
+            onClose={() => setAuthMode(null)}
+            onSubmit={handleAuth}
+          />
+        )}
       </body>
     </html>
   );
-}
-
-export default function App() {
-  return <Outlet />;
 }

@@ -2,11 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  background-image: url('midwestdevsbg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
 html,
 body {
-  @apply bg-white dark:bg-gray-950;
+  background-color: white;
+}
 
-  @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
+@media (prefers-color-scheme: dark) {
+  html,
+  body {
+    background-color: rgb(3 7 18);
   }
 }
