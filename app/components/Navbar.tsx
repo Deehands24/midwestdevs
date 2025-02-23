@@ -59,18 +59,18 @@ export function Navbar({ onSignIn, onSignUp }: NavbarProps) {
 
           {/* Auth links */}
           <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-4">
-            <Link
-              to="/signin"
+            <button
+              onClick={handleSignIn}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
             >
               Sign In
-            </Link>
-            <Link
-              to="/signup"
+            </button>
+            <button
+              onClick={handleSignUp}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200"
             >
               Sign Up
-            </Link>
+            </button>
           </div>
           
           {/* Mobile menu button */}
@@ -123,18 +123,18 @@ export function Navbar({ onSignIn, onSignUp }: NavbarProps) {
           </Link>
           {/* Mobile auth buttons */}
           <div className="mt-4 space-y-2 px-3">
-            <Link
-              to="/signin"
+            <button
+              onClick={handleSignIn}
               className="w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
             >
               Sign In
-            </Link>
-            <Link
-              to="/signup"
+            </button>
+            <button
+              onClick={handleSignUp}
               className="w-full px-4 py-2 text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors"
             >
               Sign Up
-            </Link>
+            </button>
           </div>
         </div>
       </div>
