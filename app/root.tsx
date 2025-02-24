@@ -33,8 +33,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body className="min-h-screen">
-        <Navbar />
+      <body>
         <Outlet />
         <ScrollRestoration />
         <Scripts />
