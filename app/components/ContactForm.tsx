@@ -1,37 +1,16 @@
-import { useState } from 'react';
-import type { ContactSubmission } from '~/types';
+import { Form } from "@remix-run/react";
+import { useState } from "react";
 
 interface ContactFormProps {
-  serviceType: ContactSubmission['service_type'];
-  onSubmit: (data: Omit<ContactSubmission, 'id' | 'created_at'>) => Promise<void>;
+  serviceType: string;
 }
 
-export function ContactForm({ serviceType, onSubmit }: ContactFormProps) {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: '',
-  });
+export function ContactForm({ serviceType }: ContactFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      await onSubmit({
-        ...formData,
-        service_type: serviceType,
-      });
-      setFormData({ name: '', email: '', message: '' });
-    } catch (error) {
-      console.error('Error submitting form:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <Form method="post" className="space-y-4">
+      <input type="hidden" name="service_type" value={serviceType} />
       <div>
         <label htmlFor="name" className="block text-sm font-medium text-gray-700">
           Name
@@ -39,10 +18,9 @@ export function ContactForm({ serviceType, onSubmit }: ContactFormProps) {
         <input
           type="text"
           id="name"
+          name="name"
           required
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
         />
       </div>
       <div>
@@ -52,10 +30,9 @@ export function ContactForm({ serviceType, onSubmit }: ContactFormProps) {
         <input
           type="email"
           id="email"
+          name="email"
           required
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
         />
       </div>
       <div>
@@ -64,20 +41,18 @@ export function ContactForm({ serviceType, onSubmit }: ContactFormProps) {
         </label>
         <textarea
           id="message"
+          name="message"
           required
-          rows={4}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          value={formData.message}
-          onChange={(e) => setFormData({ ...formData, message: e.target.value })}
         />
       </div>
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+        className="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
       >
-        {isSubmitting ? 'Submitting...' : 'Submit'}
+        Submit
       </button>
-    </form>
+    </Form>
   );
 } 

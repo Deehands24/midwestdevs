@@ -6,7 +6,6 @@ import { submitContactForm } from "~/services/supabase.server";
 import type { ContactSubmission } from "~/types";
 import { useActionData } from "@remix-run/react";
 import { AuthModal } from "~/components/AuthModals";
-import { signIn, signUp } from "~/services/auth.server";
 
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();

@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { AuthModal } from './AuthModals';
 import { Navbar } from './Navbar';
-import { signIn, signUp } from '~/services/auth.server';
 
 interface AuthProviderProps {
   children: React.ReactNode;
