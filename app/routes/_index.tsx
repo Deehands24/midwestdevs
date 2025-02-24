@@ -99,8 +99,8 @@ const serviceDetails = {
 };
 
 export default function Index() {
-  const [activeModal, setActiveModal] = useState<keyof typeof serviceDetails | null>(null);
-  const actionData = useActionData<typeof action>();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<string | null>(null);
 
   const handleSubmit = async (data: Omit<ContactSubmission, 'id' | 'created_at'>) => {
     const formData = new FormData();
@@ -117,7 +117,7 @@ export default function Index() {
       throw new Error('Failed to submit form');
     }
 
-    setActiveModal(null);
+    setIsModalOpen(false);
   };
 
   return (
@@ -149,7 +149,7 @@ export default function Index() {
             {resources.map(({ id, text, subtext, icon }) => (
               <li key={id}>
                 <button
-                  onClick={() => setActiveModal(id as keyof typeof serviceDetails)}
+                  onClick={() => setSelectedService(id as string)}
                   className="group flex flex-col gap-2 self-stretch p-3 leading-normal text-white hover:underline w-full text-left"
                 >
                   <div className="flex items-center gap-3">
@@ -164,17 +164,14 @@ export default function Index() {
         </nav>
 
         {/* Service Modals */}
-        {activeModal && (
-          <Modal
-            isOpen={true}
-            onClose={() => setActiveModal(null)}
-            title={serviceDetails[activeModal].title}
-            serviceType={activeModal}
-            onSubmit={handleSubmit}
-          >
-            {serviceDetails[activeModal].content}
-          </Modal>
-        )}
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          serviceType={selectedService || ''}
+          onSubmit={handleSubmit}
+        >
+          {serviceDetails[selectedService as keyof typeof serviceDetails]?.content}
+        </Modal>
       </div>
     </div>
   );

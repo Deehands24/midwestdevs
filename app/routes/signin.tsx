@@ -1,6 +1,6 @@
 import { ActionFunction, redirect } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
-
+import { signIn } from "~/services/auth.server";
 
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
@@ -49,7 +49,6 @@ export default function SignIn() {
               id="password"
               name="password"
               required
-              minLength={6}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
             />
           </div>
